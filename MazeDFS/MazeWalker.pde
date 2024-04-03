@@ -1,6 +1,9 @@
 /**
 * 迷路を解くためのクラス
 */
+
+import java.util.ArrayDeque;
+
 class MazeWalker {
   // 迷路情報
   private final MazeCreator creator;
@@ -15,11 +18,11 @@ class MazeWalker {
 
   // プレイヤーの足跡
   private boolean[][] walked;
-  private List<Cell> footSteps;
+  private ArrayDeque<Cell> footSteps;
 
   public MazeWalker(MazeCreator creator) {
     this.creator = creator;
-    this.footSteps = new ArrayList<Cell>();
+    this.footSteps = new ArrayDeque<Cell>();  // FILOとして使う
     this.walked = new boolean[creator.rows()][creator.columns()];
     for (int i=0; i<walked.length; i++) {
       for (int j=0; j<walked[0].length; j++) {
@@ -28,17 +31,14 @@ class MazeWalker {
     }
 
     // 壁ではないところにプレイヤーをランダムに配置
-    Cell cell;
-    do {
-      cell = creator.getStart();
-    } while (creator.isWall(cell.row(), cell.column()));
+    Cell cell = creator.getCell();
     this.startRow = cell.row();
     this.startColumn = cell.column();
 
-    // 壁でもスタート位置でもないところをゴールに設定
+    // 壁でもスタート位置でもないランダムなマスをゴールに設定
     do {
-      cell = creator.getStart();
-    } while (creator.isWall(cell.row(), cell.column()) && !cell.equals(new Cell(this.startRow, this.startColumn)));
+      cell = creator.getCell();
+    } while (cell.row() == this.startRow && cell.column() == this.startColumn);
     this.goalRow = cell.row();
     this.goalColumn = cell.column();
   }
@@ -73,7 +73,7 @@ class MazeWalker {
   /**
    * プレイヤーが歩いたことがあるならばtrueを返す
    */
-  public boolean walkerWalked(int r, int c) {
+  public boolean walked(int r, int c) {
     return walked[r][c];
   }
 
@@ -82,11 +82,11 @@ class MazeWalker {
     // 歩いたことがなければ状態と足跡リストを更新
     if (!walked[r][c]) {
       walked[r][c] = true;
-      footSteps.add(new Cell(r, c));
+      footSteps.addLast(new Cell(r, c));
     }
 
     // ゴールだったら終了
-    if (goalRow == r && goalColumn == c) {
+    if (isGoal(r, c)) {
       return true;
     }
 
@@ -127,17 +127,16 @@ class MazeWalker {
 
     // これ以上は歩けない
     if (!proceeded) {
-      int idx = footSteps.size();
-
       // 戻れれば戻って続ける
-      if (idx != 0) {
-        Cell next = footSteps.get(idx-1);
-        footSteps.remove(idx-1);
+      if (footSteps.size() != 0) {
+        Cell next = footSteps.removeLast();
         if (walk(next.row(), next.column())) {
           return true;
         }
       }
     }
+    
+    // これ以上進むことも戻って続けることもできない
     return false;
   }
 }

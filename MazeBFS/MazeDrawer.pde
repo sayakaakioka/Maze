@@ -33,19 +33,28 @@ class MazeDrawer {
       }
     }
   }
+  
+  // 指定された位置にコストを描く
+  private void drawCost(int r, int c){
+    fill(0, 0, 0);
+    textAlign(CENTER, CENTER);
+    text(walker.cost(r, c), (c+0.5)*cellSize, (r+0.5)*cellSize);
+  }
 
   // 指定された位置に足跡を描く
   private void drawFootStep(int r, int c) {
     stroke(200, 200, 0);
     fill(200, 200, 0);
     rect(c*this.cellSize, r*this.cellSize, this.cellSize, this.cellSize);
+    drawCost(r, c);
   }
-  
+
   // 指定された位置にゴール地点を描く
   private void drawGoal(int r, int c) {
     stroke(0, 128, 0);
     fill(0, 128, 0);
     rect(c*this.cellSize, r*this.cellSize, this.cellSize, this.cellSize);
+    drawCost(r, c);
   }
 
   // 指定された位置にスタート地点を描く
@@ -53,6 +62,7 @@ class MazeDrawer {
     stroke(255, 0, 0);
     fill(255, 0, 0);
     rect(c*this.cellSize, r*this.cellSize, this.cellSize, this.cellSize);
+    drawCost(r, c);
   }
 
   // 指定されたマスを壁として描く
